@@ -1,0 +1,53 @@
+name: demoPipeline
+
+stages:
+  - build
+  - test
+  - doc
+  - deploy
+
+jobs:
+  - name: "compile"
+    dockerImage: "maven:3.9.6-eclipse-temurin-21"
+    script:
+      - "mvn clean compile"
+    allowFailure: false
+    stage: "build"
+    workingDir: "C:/Users/Ree Li/Desktop/NEU/cs6510/demo-project"
+
+  - name: "unit-tests"
+    dockerImage: "maven:3.9.6-eclipse-temurin-21"
+    script:
+      - "mvn test"
+    allowFailure: false
+    stage: "test"
+    workingDir: "C:/Users/Ree Li/Desktop/NEU/cs6510/demo-project"
+    dependencies: ["compile"]
+
+  - name: "generate-docs"
+    dockerImage: "maven:3.9.6-eclipse-temurin-21"
+    script:
+      - "mvn javadoc:javadoc"
+    allowFailure: false
+    stage: "doc"
+    workingDir: "C:/Users/Ree Li/Desktop/NEU/cs6510/demo-project"
+    dependencies: ["compile"]
+
+  - name: "package-jar"
+    dockerImage: "maven:3.9.6-eclipse-temurin-21"
+    script:
+      - "mvn package"
+    allowFailure: false
+    stage: "deploy"
+    workingDir: "C:/Users/Ree Li/Desktop/NEU/cs6510/demo-project"
+    dependencies: ["compile", "unit-tests"]
+
+  - name: "copy-artifact"
+    dockerImage: "maven:3.9.6-eclipse-temurin-21"
+    script:
+      - "mkdir -p /app/deployments"
+      - "cp target/demo-project-1.0-SNAPSHOT.jar /app/deployments/"
+    allowFailure: false
+    stage: "deploy"
+    workingDir: "C:/Users/Ree Li/Desktop/NEU/cs6510/demo-project"
+    dependencies: ["package-jar"]
